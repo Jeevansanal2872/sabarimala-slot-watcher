@@ -1,0 +1,38 @@
+name: Build apps
+
+# No dev setup needed: push this folder to a GitHub repo, open the Actions tab,
+# run "Build apps", then download the Windows / macOS files from the run's Artifacts.
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            script: dist:win
+            artifact: Virtual-Q-Detector-Windows
+          - os: macos-latest
+            script: dist:mac
+            artifact: Virtual-Q-Detector-macOS
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install
+      - run: npm test
+      - run: npm run ${{ matrix.script }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: |
+            dist/*.exe
+            dist/*.dmg
+          if-no-files-found: error

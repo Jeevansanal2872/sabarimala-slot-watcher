@@ -1,0 +1,84 @@
+{
+  "name": "virtual-q-detector",
+  "productName": "Virtual Q Detector",
+  "version": "1.0.0",
+  "description": "Sabarimala Virtual Q slot monitor — get instantly notified the moment darshan booking slots open",
+  "main": "src/main.js",
+  "author": "Virtual Q Detector",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "test": "node src/detect.test.js",
+    "icons": "node tools/gen-icons.js",
+    "dist:win": "electron-builder --win --publish never",
+    "dist:mac": "electron-builder --mac --publish never",
+    "dist": "electron-builder --publish never"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.16"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.virtualqdetector.app",
+    "productName": "Virtual Q Detector",
+    "compression": "maximum",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "renderer/**/*",
+      "build/tray.png",
+      "package.json"
+    ],
+    "win": {
+      "icon": "build/icon.png",
+      "electronLanguages": [
+        "en-US"
+      ],
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "deleteAppDataOnUninstall": false,
+      "differentialPackage": false
+    },
+    "mac": {
+      "icon": "build/icon.png",
+      "category": "public.app-category.utilities",
+      "electronLanguages": [
+        "en-US"
+      ],
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ]
+    }
+  },
+  "allowScripts": {
+    "electron@33.4.11": true
+  }
+}

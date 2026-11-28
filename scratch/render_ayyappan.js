@@ -1,0 +1,264 @@
+const { app, BrowserWindow } = require('electron');
+const fs = require('fs');
+const path = require('path');
+
+const svgContent = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1024" height="1024">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bgGrad" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#1e1b4b" />
+      <stop offset="40%" stop-color="#0f172a" />
+      <stop offset="85%" stop-color="#050811" />
+      <stop offset="100%" stop-color="#020408" />
+    </radialGradient>
+
+    <!-- Divine Golden Aura / Halo -->
+    <radialGradient id="divineGlow" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#fef08a" stop-opacity="0.85" />
+      <stop offset="35%" stop-color="#f59e0b" stop-opacity="0.45" />
+      <stop offset="70%" stop-color="#b45309" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#b45309" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Prabhavali Gold Gradient -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef9c3" />
+      <stop offset="25%" stop-color="#fcd34d" />
+      <stop offset="50%" stop-color="#f59e0b" />
+      <stop offset="75%" stop-color="#d97706" />
+      <stop offset="100%" stop-color="#92400e" />
+    </linearGradient>
+
+    <!-- Bright Gold Specular -->
+    <linearGradient id="brightGold" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="30%" stop-color="#fef08a" />
+      <stop offset="70%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+
+    <!-- Lotus / Sacred Base Gradient -->
+    <linearGradient id="lotusGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fda4af" />
+      <stop offset="50%" stop-color="#f43f5e" />
+      <stop offset="100%" stop-color="#9f1239" />
+    </linearGradient>
+
+    <!-- Drop Shadows & Glow Filters -->
+    <filter id="holyGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Circle with Sacred Rim -->
+  <circle cx="256" cy="256" r="248" fill="url(#bgGrad)" stroke="url(#goldGrad)" stroke-width="6" />
+  <circle cx="256" cy="256" r="238" fill="none" stroke="url(#goldGrad)" stroke-width="1.5" stroke-opacity="0.4" stroke-dasharray="4 6" />
+
+  <!-- Radiating Prabhavali Halo / Divine Rays -->
+  <circle cx="256" cy="230" r="190" fill="url(#divineGlow)" />
+
+  <!-- Prabhavali Arch (Golden Aureole) -->
+  <path d="M 120 370 C 100 240, 150 100, 256 90 C 362 100, 412 240, 392 370"
+        fill="none" stroke="url(#goldGrad)" stroke-width="12" stroke-linecap="round" />
+  <path d="M 134 365 C 118 250, 160 115, 256 106 C 352 115, 394 250, 378 365"
+        fill="none" stroke="#fef08a" stroke-width="2.5" stroke-opacity="0.6" />
+
+  <!-- Flame / Jewel Finial at top of Prabhavali -->
+  <path d="M 256 68 C 248 80, 246 88, 256 98 C 266 88, 264 80, 256 68 Z" fill="url(#brightGold)" filter="url(#holyGlow)" />
+  <circle cx="256" cy="98" r="5" fill="#fef9c3" />
+
+  <!-- Outer Rays from Prabhavali -->
+  <g stroke="url(#goldGrad)" stroke-width="3" stroke-linecap="round" opacity="0.8">
+    <line x1="256" y1="88" x2="256" y2="60" />
+    <line x1="210" y1="98" x2="198" y2="74" />
+    <line x1="302" y1="98" x2="314" y2="74" />
+    <line x1="168" y1="126" x2="148" y2="106" />
+    <line x1="344" y1="126" x2="364" y2="106" />
+    <line x1="136" y1="168" x2="112" y2="154" />
+    <line x1="376" y1="168" x2="400" y2="154" />
+    <line x1="116" y1="218" x2="90" y2="210" />
+    <line x1="396" y1="218" x2="422" y2="210" />
+    <line x1="110" y1="272" x2="84" y2="272" />
+    <line x1="402" y1="272" x2="428" y2="272" />
+  </g>
+
+  <!-- Sacred 18 Steps (Pathinettampadi) / Lotus Pedestal Base -->
+  <g id="sacredBase">
+    <!-- Base Platform -->
+    <rect x="136" y="420" width="240" height="14" rx="5" fill="url(#goldGrad)" />
+    <rect x="150" y="434" width="212" height="12" rx="4" fill="#92400e" stroke="url(#goldGrad)" stroke-width="1.5" />
+    
+    <!-- 18 Steps stylized ridges -->
+    <path d="M 160 430 L 352 430 M 170 438 L 342 438" stroke="#fef08a" stroke-width="1.5" stroke-linecap="round" opacity="0.7" />
+
+    <!-- Lotus Petals Peedam -->
+    <path d="M 160 420 C 180 395, 220 395, 230 420 C 240 390, 272 390, 282 420 C 292 395, 332 395, 352 420 Z" fill="url(#lotusGrad)" stroke="url(#goldGrad)" stroke-width="2" />
+    <path d="M 230 420 C 240 400, 272 400, 282 420 Z" fill="#fda4af" />
+  </g>
+
+  <!-- ==================== SWAMI AYYAPPAN DIVINE FORM ==================== -->
+  <g id="lordAyyappan" filter="url(#holyGlow)">
+
+    <!-- Halo behind Head (Siras-Chakra) -->
+    <circle cx="256" cy="190" r="44" fill="url(#divineGlow)" />
+    <circle cx="256" cy="190" r="38" fill="none" stroke="url(#brightGold)" stroke-width="2.5" opacity="0.85" />
+    <circle cx="256" cy="190" r="34" fill="none" stroke="#fef08a" stroke-width="1" stroke-dasharray="3 3" opacity="0.6" />
+
+    <!-- Sacred Crown (Ratna Kireedam) -->
+    <!-- Crown Base -->
+    <path d="M 236 172 L 276 172 L 273 162 L 239 162 Z" fill="url(#goldGrad)" stroke="#fef08a" stroke-width="1" />
+    <!-- Tier 1 -->
+    <path d="M 238 162 L 274 162 L 270 144 L 242 144 Z" fill="url(#brightGold)" />
+    <!-- Tier 2 -->
+    <path d="M 243 144 L 269 144 L 265 128 L 247 128 Z" fill="url(#goldGrad)" />
+    <!-- Crown Finial / Dome -->
+    <path d="M 248 128 C 248 116, 256 112, 256 112 C 256 112, 264 116, 264 128 Z" fill="url(#brightGold)" />
+    <circle cx="256" cy="111" r="3.5" fill="#fef9c3" />
+    <!-- Peacock Feather / Kalabham Crest on Crown -->
+    <path d="M 256 110 C 252 98, 260 92, 264 96 C 266 102, 259 106, 256 110 Z" fill="#38bdf8" stroke="#fef08a" stroke-width="1" />
+    <circle cx="260" cy="98" r="2" fill="#10b981" />
+
+    <!-- Head & Divine Face -->
+    <path d="M 240 172 C 240 168, 272 168, 272 172 C 274 186, 271 204, 256 206 C 241 204, 238 186, 240 172 Z" fill="#fef3c7" stroke="url(#goldGrad)" stroke-width="1.5" />
+    <!-- Divine Sandalwood & Kumkum Tilak (Vibhuti / Thiru-Namam) -->
+    <path d="M 250 178 Q 256 179 262 178" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" />
+    <circle cx="256" cy="183" r="1.8" fill="#ef4444" />
+    <!-- Serene Eyes & Graceful Expression -->
+    <path d="M 246 186 Q 249 188 252 186" stroke="#92400e" stroke-width="1.2" stroke-linecap="round" fill="none" />
+    <path d="M 260 186 Q 263 188 266 186" stroke="#92400e" stroke-width="1.2" stroke-linecap="round" fill="none" />
+    <!-- Kundalams (Golden Ear Ornaments) -->
+    <circle cx="237" cy="186" r="4.5" fill="url(#brightGold)" />
+    <circle cx="275" cy="186" r="4.5" fill="url(#brightGold)" />
+
+    <!-- Divine Torso & Shoulders -->
+    <path d="M 230 206 C 215 212, 204 228, 206 244 L 214 286 C 220 310, 240 316, 256 316 C 272 316, 292 310, 298 286 L 306 244 C 308 228, 297 212, 282 206 Z"
+          fill="#fef3c7" stroke="url(#goldGrad)" stroke-width="2" />
+
+    <!-- Sacred Bell Necklace (Manikandan Bell) -->
+    <path d="M 240 208 Q 256 226 272 208" fill="none" stroke="url(#brightGold)" stroke-width="3" />
+    <path d="M 236 214 Q 256 238 276 214" fill="none" stroke="url(#goldGrad)" stroke-width="2" />
+    <!-- The Golden Mani (Bell) -->
+    <path d="M 252 232 L 260 232 L 262 242 L 250 242 Z" fill="url(#brightGold)" stroke="#92400e" stroke-width="1" />
+    <circle cx="256" cy="244" r="2.5" fill="#fef08a" />
+
+    <!-- Sacred Upavita (Poonal / Holy Thread) -->
+    <path d="M 238 210 Q 266 260 274 310" fill="none" stroke="#fef08a" stroke-width="1.5" stroke-dasharray="4 2" />
+
+    <!-- ==================== YOGAPATTASANA POSTURE (SEATED KNEES) ==================== -->
+    <!-- Left Knee & Thigh (Viewer Right) -->
+    <path d="M 284 278 C 314 278, 334 300, 330 336 C 326 368, 308 382, 288 384 L 272 384 C 270 360, 272 330, 280 292 Z"
+          fill="#fef3c7" stroke="url(#goldGrad)" stroke-width="2" />
+
+    <!-- Right Knee & Thigh (Viewer Left) -->
+    <path d="M 228 278 C 198 278, 178 300, 182 336 C 186 368, 204 382, 224 384 L 240 384 C 242 360, 240 330, 232 292 Z"
+          fill="#fef3c7" stroke="url(#goldGrad)" stroke-width="2" />
+
+    <!-- Crossed Feet & Ankles on Pedestal -->
+    <path d="M 222 384 Q 256 396 290 384 C 286 404, 226 404, 222 384 Z" fill="#fde68a" stroke="url(#goldGrad)" stroke-width="2" />
+    <!-- Golden Anklets (Silambu / Golusu) -->
+    <ellipse cx="236" cy="386" rx="14" ry="4" fill="none" stroke="url(#brightGold)" stroke-width="2.5" />
+    <ellipse cx="276" cy="386" rx="14" ry="4" fill="none" stroke="url(#brightGold)" stroke-width="2.5" />
+
+    <!-- THE SACRED YOGAPATTA (Golden Band binding the knees) -->
+    <g id="yogapatta">
+      <path d="M 188 334 C 220 348, 292 348, 324 334 C 328 348, 324 358, 320 364 C 288 376, 224 376, 192 364 C 188 358, 184 348, 188 334 Z"
+            fill="url(#brightGold)" stroke="#92400e" stroke-width="2" />
+      <!-- Yogapatta Embellishment & Central Clasp -->
+      <path d="M 194 348 Q 256 362 318 348" fill="none" stroke="#fef9c3" stroke-width="1.5" stroke-dasharray="3 3" />
+      <circle cx="256" cy="355" r="7" fill="url(#goldGrad)" stroke="#fef08a" stroke-width="1.5" />
+      <circle cx="256" cy="355" r="3.5" fill="#ef4444" />
+    </g>
+
+    <!-- LEFT ARM & HAND (Resting serenely on Left Knee) -->
+    <path d="M 298 238 C 322 254, 334 278, 332 308 L 324 336 C 320 344, 310 346, 304 338 L 298 328"
+          fill="#fef3c7" stroke="url(#goldGrad)" stroke-width="2" />
+    <!-- Armlet (Vanki) & Bangle -->
+    <ellipse cx="316" cy="270" rx="6" ry="10" fill="url(#brightGold)" stroke="#92400e" stroke-width="1" />
+    <ellipse cx="320" cy="326" rx="5" ry="7" fill="url(#brightGold)" />
+
+    <!-- RIGHT ARM & CHINMUDRA (Jnana Mudra - Teaching & Blessing Gesture) -->
+    <path d="M 214 238 C 190 254, 184 276, 188 302 L 198 320"
+          fill="#fef3c7" stroke="url(#goldGrad)" stroke-width="2" />
+    <!-- Forearm rising towards chest in Chinmudra -->
+    <path d="M 198 320 C 204 304, 214 286, 226 270"
+          fill="#fef3c7" stroke="url(#goldGrad)" stroke-width="2" />
+    <!-- Armlet on Right Arm -->
+    <ellipse cx="196" cy="270" rx="6" ry="10" fill="url(#brightGold)" stroke="#92400e" stroke-width="1" />
+
+    <!-- Chinmudra Hand at chest level -->
+    <!-- Palm and fingers -->
+    <path d="M 224 268 C 224 256, 234 252, 238 258 C 242 264, 238 274, 230 278 Z" fill="#fef3c7" stroke="url(#goldGrad)" stroke-width="1.5" />
+    <!-- Index finger & thumb joined in circle -->
+    <circle cx="235" cy="260" r="4" fill="none" stroke="#92400e" stroke-width="1.5" />
+    <!-- Three extended fingers upward -->
+    <path d="M 236 254 L 240 242 M 239 256 L 245 244 M 241 258 L 248 248" stroke="#92400e" stroke-width="1.8" stroke-linecap="round" />
+    <!-- Golden Bangle on Right Wrist -->
+    <ellipse cx="222" cy="272" rx="4" ry="7" fill="url(#brightGold)" />
+
+  </g>
+
+  <!-- Sacred Chant Inscription in Ribbon / Banner -->
+  <g id="holyChant">
+    <path d="M 120 466 Q 256 480 392 466 Q 372 492 256 496 Q 140 492 120 466 Z"
+          fill="url(#goldGrad)" stroke="#fef08a" stroke-width="1.5" />
+    <text x="256" y="485" text-anchor="middle"
+          font-family="system-ui, -apple-system, sans-serif"
+          font-size="16" font-weight="800" letter-spacing="2.5"
+          fill="#1e1b4b">SWAMIYE SARANAM AYYAPPA</text>
+  </g>
+</svg>
+`;
+
+app.whenReady().then(async () => {
+  const win = new BrowserWindow({
+    show: false,
+    width: 1200,
+    height: 1200,
+    webPreferences: {
+      offscreen: true,
+      nodeIntegration: true,
+      contextIsolation: false
+    }
+  });
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { margin: 0; background: transparent; overflow: hidden; display: flex; align-items: center; justify-content: center; width: 100vw; height: 100vh; }
+          #container { width: 1024px; height: 1024px; }
+          svg { width: 100%; height: 100%; }
+        </style>
+      </head>
+      <body>
+        <div id="container">${svgContent}</div>
+      </body>
+    </html>
+  `;
+
+  await win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
+  await new Promise(r => setTimeout(r, 600));
+
+  const image1024 = await win.webContents.capturePage({ x: 0, y: 0, width: 1024, height: 1024 });
+  const png1024 = image1024.toPNG();
+
+  const image64 = image1024.resize({ width: 64, height: 64, quality: 'high' });
+  const png64 = image64.toPNG();
+
+  const outDir = path.join(__dirname, '..', 'build');
+  fs.mkdirSync(outDir, { recursive: true });
+  fs.writeFileSync(path.join(outDir, 'icon.png'), png1024);
+  fs.writeFileSync(path.join(outDir, 'tray.png'), png64);
+
+  // Also save the SVG file for future use and web scaling
+  fs.writeFileSync(path.join(outDir, 'ayyappan_logo.svg'), svgContent.trim());
+
+  console.log('SUCCESS: Rendered Sabarimala Lord Ayyappan icons!');
+  console.log('1024x1024 PNG size:', png1024.length, 'bytes');
+  console.log('64x64 PNG size:', png64.length, 'bytes');
+
+  app.quit();
+});
